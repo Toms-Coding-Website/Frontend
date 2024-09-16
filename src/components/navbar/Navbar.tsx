@@ -1,60 +1,63 @@
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
-import { Typography, Box, Button } from "@mui/material";
+import { Typography, Box, useTheme } from "@mui/material";
 import Container from "@mui/material/Container";
-import { lightTheme } from "../../themes/muiTheme";
+import DynamicButton from "../button/DynamicButton";
 
 interface NavbarTitleProps {
   display: { xs: string; md: string };
   variant: "h6" | "h5" | "h4" | "h3" | "h2" | "h1";
 }
 
-const NavbarTitle = ({ display, variant }: NavbarTitleProps) => (
-  <Box
-    component="a"
-    href="/"
-    sx={{
-      display: display,
-      alignItems: "center",
-      textDecoration: "none",
-      color: "inherit",
-      transition: "transform 0.3s ease",
-      "&:hover": {
-        transform: "translateY(-3px)",
-      },
-    }}
-  >
-    <img
-      src="/hatIcon96.png"
-      alt="Icon"
-      style={{ width: 40, height: 40, marginRight: 8 }}
-    />
-    <Typography
-      variant={variant}
-      noWrap
+const NavbarTitle = ({ display, variant }: NavbarTitleProps) => {
+  const theme = useTheme();
+  return (
+    <Box
+      component="a"
+      href="/"
       sx={{
-        fontWeight: 700,
-        letterSpacing: ".1rem",
-        color: "inherit",
-        fontSize: { xs: "1.1rem", sm: "1.5rem", md: "1.75rem", lg: "2rem" },
+        display: display,
+        alignItems: "center",
+        textDecoration: "none",
+        transition: "transform 0.3s ease",
+        "&:hover": {
+          transform: "translateY(-3px)",
+        },
       }}
     >
-      Tom's Online Coding Class
-    </Typography>
-  </Box>
-);
+      <img
+        src="/hatIcon96.png"
+        alt="Icon"
+        style={{ width: 40, height: 40, marginRight: 8 }}
+      />
+      <Typography
+        variant={variant}
+        noWrap
+        sx={{
+          fontWeight: 700,
+          letterSpacing: ".1rem",
+          fontSize: { xs: "1.1rem", sm: "1.5rem", md: "1.75rem", lg: "2rem" },
+          color: theme.textColors.title,
+        }}
+      >
+        Tom's Online Coding Class
+      </Typography>
+    </Box>
+  );
+};
 
 interface NavbarProps {
   onThemeChange: () => void;
 }
 
 const Navbar = ({ onThemeChange }: NavbarProps) => {
+  const theme = useTheme();
+
   return (
     <AppBar
       position="static"
       sx={{
-        backgroundColor: lightTheme.palette.secondary.main,
-        color: lightTheme.palette.primary.main,
+        backgroundColor: theme.backgroundColors.navbar,
       }}
     >
       <Container
@@ -76,21 +79,12 @@ const Navbar = ({ onThemeChange }: NavbarProps) => {
             <NavbarTitle display={{ xs: "none", md: "flex" }} variant="h6" />
             <NavbarTitle display={{ xs: "flex", md: "none" }} variant="h5" />
           </Box>
-          <Button
+          <DynamicButton
             onClick={onThemeChange}
-            sx={{
-              color: lightTheme.palette.primary.main,
-              transition: "transform 0.3s ease",
-              "&:hover": {
-                transform: "translateY(-3px)",
-              },
-              fontSize: { xs: "0.9rem", sm: "1rem", md: "1.1rem" },
-              fontWeight: 400,
-              letterSpacing: ".03rem",
-            }}
-          >
-            {"Change Theme"}
-          </Button>
+            label="Change Theme"
+            variant="contained"
+            size="small"
+          />
         </Toolbar>
       </Container>
     </AppBar>

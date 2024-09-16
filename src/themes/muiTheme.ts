@@ -13,6 +13,10 @@ declare module "@mui/material/styles" {
       navbar: string;
       main: string;
       footer: string;
+      button: string;
+    };
+    hoverColors: {
+      button: string;
     };
   }
   interface ThemeOptions {
@@ -26,6 +30,10 @@ declare module "@mui/material/styles" {
       navbar?: string;
       main?: string;
       footer?: string;
+      button?: string;
+    };
+    hoverColors?: {
+      button?: string;
     };
   }
 }
@@ -33,46 +41,42 @@ declare module "@mui/material/styles" {
 const lightTheme = createTheme({
   palette: {
     mode: "light",
-    primary: {
-      main: "#FFFFFF",
-    },
-    secondary: {
-      main: "#000000",
-    },
   },
   textColors: {
-    link: "#1E88E5",
-    text: "#212121",
-    title: "#000000",
+    link: "#1e88e5",
+    text: "#102C57",
+    title: "#102C57",
   },
   backgroundColors: {
     codeBlock: "#f5f5f5",
-    navbar: "#e0e0e0",
-    main: "#ffffff",
+    navbar: "#DAC0A3",
+    main: "#EADBC8",
     footer: "#e0e0e0",
+    button: "#c4a684",
+  },
+  hoverColors: {
+    button: "#b3926d",
   },
 });
 
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
-    primary: {
-      main: "#90caf9",
-    },
-    secondary: {
-      main: "#f48fb1",
-    },
   },
   textColors: {
     link: "#bb86fc",
-    text: "#e0e0e0",
-    title: "#ffffff",
+    text: "#ECDFCC",
+    title: "#ECDFCC",
   },
   backgroundColors: {
-    codeBlock: "#424242",
-    navbar: "#333333",
-    main: "#121212",
-    footer: "#333333",
+    codeBlock: "#1e1e1e",
+    navbar: "#181C14",
+    main: "#3C3D37",
+    footer: "#181C14",
+    button: "#697565",
+  },
+  hoverColors: {
+    button: "#4e5c49",
   },
 });
 
