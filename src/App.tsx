@@ -1,24 +1,26 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ThemeProvider, Box, styled } from "@mui/material";
 import { lightTheme, darkTheme } from "./themes/muiTheme";
+import CssBaseline from "@mui/material/CssBaseline";
 
 import LobbyPage from "./pages/lobby/Lobby.page";
 import CodePage from "./pages/code/Code.page";
 import Navbar from "./components/navbar/Navbar";
-import CodeEditor from "./components/codeEditor/CodeEditor";
 import { useState } from "react";
 
 const router = [
   { path: "/", component: LobbyPage },
-  { path: "/code/:codeId", component: CodePage },
+  //{ path: "/code/:codeId", component: CodePage },
+  { path: "/code", component: CodePage }, //Added for testing - Remove when DB is connected.
   { path: "*", component: LobbyPage },
 ];
 
-const BoxContainer = styled(Box)({
+const BoxContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   minHeight: "100vh",
-});
+  backgroundColor: theme.backgroundColors.main,
+}));
 
 const BoxContent = styled(Box)({
   flexGrow: 1,
@@ -26,16 +28,24 @@ const BoxContent = styled(Box)({
 });
 
 const App = () => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    const savedTheme = localStorage.getItem("theme");
+    return savedTheme === "dark" ? true : false;
+  });
 
   const theme = isDarkMode ? darkTheme : lightTheme;
 
   const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
+    setIsDarkMode((prevMode) => {
+      const newMode = !prevMode;
+      localStorage.setItem("theme", newMode ? "dark" : "light");
+      return newMode;
+    });
   };
 
   return (
     <ThemeProvider theme={theme}>
+      <CssBaseline />
       <BoxContainer sx={{ backgroundColor: lightTheme.palette.primary.main }}>
         <Navbar onThemeChange={toggleTheme} />
         <BoxContent>
@@ -51,7 +61,6 @@ const App = () => {
             </Routes>
           </Router>
         </BoxContent>
-        <CodeEditor onSubmit={() => {}}></CodeEditor>
       </BoxContainer>
     </ThemeProvider>
   );
