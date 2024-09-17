@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { ICodeBlock } from "../../utils/types/types";
 import PageContainer from "../../components/pageContainer/PageContainer";
 import axios from "axios";
-import { codeBlocksLink } from "../../utils/constants/backendLinks";
+import { codeBlockLink } from "../../utils/constants/backendLinks";
 import { Box, styled, Grid, Typography, useTheme } from "@mui/material";
 import CodeBlockCard from "../../components/codeBlockCard/CodeBlockCard";
 
@@ -69,7 +69,7 @@ const LobbyPage = () => {
       description:
         "Create a simple promise that resolves after 2 seconds and logs a message.",
       hint: `
-        // message the promise should log: 'Promise resolved after 2 seconds'
+        // message the promise should log: Promise resolved after 2 seconds
         const myPromise = new Promise((resolve, reject) => {
           // Your promise logic goes here (delete this line)
         }
@@ -106,7 +106,7 @@ const LobbyPage = () => {
       _id: "4",
       title: "Object Destructuring",
       description:
-        "Use object destructuring to extract properties from an object and log them.aaaaaaa aaaaaaaaaaaaaa aaaaaaaaaaaaa a a a aaaaa aaa aa aaaaa aaaaa",
+        "Use object destructuring to extract properties from an object and log them.",
       hint: `
         const person = {
           name: 'John',
@@ -131,7 +131,7 @@ const LobbyPage = () => {
     },
     {
       _id: "5",
-      title: "Array Filter Example",
+      title: "Array Filter",
       description: "Filter an array to get only the even numbers and log them.",
       hint: `
         const numbers = [1, 2, 3, 4, 5, 6];
@@ -147,14 +147,15 @@ const LobbyPage = () => {
 
   useEffect(() => {
     const fetchCodeBlocks = async () => {
-      const response = await axios.get(`${codeBlocksLink}`);
+      const response = await axios.get(`${codeBlockLink}`);
       setCodeBlocks(response.data);
     };
     fetchCodeBlocks();
   }, []);
+
   //TODO - Change tempCodeBlocksData to codeBlocks when backend is connected.
   return (
-    tempCodeBlocksData && (
+    codeBlocks && (
       <PageContainer>
         <Typography
           sx={{
@@ -173,7 +174,7 @@ const LobbyPage = () => {
             columnSpacing={1}
             sx={{ maxWidth: "85rem", mb: 3 }}
           >
-            {tempCodeBlocksData.map((codeBlock) => (
+            {codeBlocks.map((codeBlock) => (
               <TransitionGridItem
                 xs={12}
                 sm={6}

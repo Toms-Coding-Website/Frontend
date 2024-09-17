@@ -38,22 +38,22 @@ const CodePage = () => {
   };
 
   return (
-    <PageContainer>
-      <Typography
-        sx={{
-          color: theme.textColors.title,
-          marginBottom: theme.spacing(2),
-          textAlign: "center",
-          fontWeight: 700,
-          fontSize: { xs: "1.3rem", sm: "1.75rem", md: "2rem", lg: "2.3rem" },
-        }}
-      >
-        Assignment Title
-      </Typography>
-      {codeBlock && (
+    codeBlock && (
+      <PageContainer>
+        <Typography
+          sx={{
+            color: theme.textColors.title,
+            marginBottom: theme.spacing(2),
+            textAlign: "center",
+            fontWeight: 700,
+            fontSize: { xs: "1.3rem", sm: "1.75rem", md: "2rem", lg: "2.3rem" },
+          }}
+        >
+          Assignment Title
+        </Typography>
         <CodeEditor onSubmit={handleCodeSubmit} codeBlock={codeBlock} />
-      )}
-    </PageContainer>
+      </PageContainer>
+    )
   );
 };
 

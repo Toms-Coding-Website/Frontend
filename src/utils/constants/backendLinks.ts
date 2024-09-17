@@ -1,3 +1,2 @@
-export const serverLink: string = "http://localhost:5000";
-export const codeBlocksLink: string = serverLink + "/codeblocks";
-export const codeBlockLink: string = serverLink + "/codeblock/";
+export const serverLink: string = "http://localhost:3000";
+export const codeBlockLink: string = serverLink + "/code-block/";
