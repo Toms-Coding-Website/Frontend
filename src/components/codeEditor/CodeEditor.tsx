@@ -1,9 +1,9 @@
-// src/components/CodeEditor.tsx
 import React, { useState } from "react";
 import Editor from "@monaco-editor/react";
 import { Box, Typography, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import DynamicButton from "../button/DynamicButton";
+import { ICodeBlock } from "../../utils/types/types";
 
 // Styled component for the editor wrapper
 const EditorWrapper = styled(Box)(({ theme }) => ({
@@ -17,9 +17,10 @@ const EditorWrapper = styled(Box)(({ theme }) => ({
 
 interface CodeEditorProps {
   onSubmit: (code: string) => void;
+  codeBlock: ICodeBlock;
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({ onSubmit }) => {
+const CodeEditor: React.FC<CodeEditorProps> = ({ onSubmit, codeBlock }) => {
   const [code, setCode] = useState<string>("");
   const theme = useTheme();
 
@@ -59,7 +60,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ onSubmit }) => {
         <Editor
           height="100%"
           defaultLanguage="javascript"
-          defaultValue="// Write your code here"
+          defaultValue={codeBlock.hint}
           onChange={handleEditorChange}
           theme={theme.palette.mode === "dark" ? "vs-dark" : "vs"}
           options={{

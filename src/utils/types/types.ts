@@ -3,4 +3,5 @@ export interface ICodeBlock {
   title: string;
   description: string;
   solution: string;
+  hint: string;
 }

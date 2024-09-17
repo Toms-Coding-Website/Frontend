@@ -10,7 +10,7 @@ import { useState } from "react";
 
 const router = [
   { path: "/", component: LobbyPage },
-  //{ path: "/code/:codeId", component: CodePage },
+  { path: "/code/:codeBlockId", component: CodePage },
   { path: "/code", component: CodePage }, //Added for testing - Remove when DB is connected.
   { path: "*", component: LobbyPage },
 ];
