@@ -8,9 +8,7 @@ import { ICodeBlock } from "../../utils/types/types";
 import { codeBlockLink, serverLink } from "../../utils/constants/backendLinks";
 import { io } from "socket.io-client";
 
-const MemoizedCodeEditor = memo(CodeEditor, (prevProps, nextProps) => {
-  return prevProps.code === nextProps.code;
-});
+const MemoizedCodeEditor = memo(CodeEditor);
 
 const CodePage = () => {
   const theme = useTheme();
@@ -90,9 +88,6 @@ const CodePage = () => {
 
   const handleCodeChange = useCallback(
     (code: string) => {
-      if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current);
-      }
       const userId = socket.id;
       debounceTimeout.current = window.setTimeout(() => {
         socket?.emit("codeChange", { code, userId });
