@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
 import { Box, Typography, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import DynamicButton from "../button/DynamicButton";
-import { ICodeBlock } from "../../utils/types/types";
 
 // Styled component for the editor wrapper
 const EditorWrapper = styled(Box)(({ theme }) => ({
@@ -17,21 +16,35 @@ const EditorWrapper = styled(Box)(({ theme }) => ({
 
 interface CodeEditorProps {
   onSubmit: (code: string) => void;
-  codeBlock: ICodeBlock;
+  onChange: (code: string) => void;
+  code: string;
+  readOnly: boolean; // Add readOnly prop
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({ onSubmit, codeBlock }) => {
-  const [code, setCode] = useState<string>("");
+const CodeEditor: React.FC<CodeEditorProps> = ({
+  onSubmit,
+  onChange,
+  code,
+  readOnly,
+}) => {
   const theme = useTheme();
+
+  // Sync editor with the incoming code prop
+  useEffect(() => {
+    setCode(code);
+  }, [code]);
+
+  const [editorCode, setCode] = useState<string>(code);
 
   const handleEditorChange = (value: string | undefined) => {
     if (value !== undefined) {
       setCode(value);
+      onChange(value);
     }
   };
 
   const handleSubmit = () => {
-    onSubmit(code);
+    onSubmit(editorCode);
   };
 
   return (
@@ -60,7 +73,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ onSubmit, codeBlock }) => {
         <Editor
           height="100%"
           defaultLanguage="javascript"
-          defaultValue={codeBlock.hint}
+          value={editorCode}
           onChange={handleEditorChange}
           theme={theme.palette.mode === "dark" ? "vs-dark" : "vs"}
           options={{
@@ -68,15 +81,18 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ onSubmit, codeBlock }) => {
             matchBrackets: "near",
             minimap: { enabled: false }, // Disable minimap
             scrollBeyondLastLine: false, // Disable scrolling beyond the last line
+            readOnly: readOnly, // Set readOnly option
           }}
         />
       </EditorWrapper>
-      <DynamicButton
-        onClick={handleSubmit}
-        label="Submit"
-        variant="contained"
-        size="small"
-      />
+      {!readOnly && ( // Only show the submit button if not read-only
+        <DynamicButton
+          onClick={handleSubmit}
+          label="Submit"
+          variant="contained"
+          size="small"
+        />
+      )}
     </Box>
   );
 };
