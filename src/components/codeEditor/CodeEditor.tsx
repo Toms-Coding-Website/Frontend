@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Editor from "@monaco-editor/react";
 import { Box, Typography, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import DynamicButton from "../button/DynamicButton";
 import { ICodeBlock } from "../../utils/types/types";
 
+// Style for the editor wrapper
 const EditorWrapper = styled(Box)(({ theme }) => ({
   width: "100%",
   height: "500px",
@@ -34,24 +35,46 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   const theme = useTheme();
 
   const [editorCode, setCode] = useState<string>(code);
+  const editorRef = useRef<any>(null); // Ref to store the editor instance
+  const cursorPositionRef = useRef<any>(null); // Ref to store the cursor position
 
   useEffect(() => {
     setCode(code);
   }, [code]);
 
+  // Handle editor changes
   const handleEditorChange = (value: string | undefined) => {
-    if (value !== undefined) {
+    if (value !== undefined && editorRef.current) {
+      // Store the cursor position before updating the editor content
+      cursorPositionRef.current = editorRef.current.getPosition();
+
       setCode(value);
       onChange(value);
     }
   };
+
+  // Handle editor mount to store the editor instance
+  const handleEditorDidMount = (editor: any) => {
+    editorRef.current = editor;
+  };
+
+  // Update editor value and restore cursor position after rendering
+  useEffect(() => {
+    if (editorRef.current) {
+      editorRef.current.setValue(editorCode);
+
+      // Restore the cursor position
+      if (cursorPositionRef.current) {
+        editorRef.current.setPosition(cursorPositionRef.current);
+      }
+    }
+  }, [editorCode]);
 
   const handleSubmit = () => {
     if (!codeBlock) return;
 
     const isCorrect = code.trim() === codeBlock.solution.trim();
 
-    // Emit the result to the parent component via the onSubmitSolution prop
     onSubmitSolution(isCorrect);
   };
 
@@ -110,6 +133,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
           defaultLanguage="javascript"
           value={editorCode}
           onChange={handleEditorChange}
+          onMount={handleEditorDidMount} // Set the editor instance when mounted
           theme={theme.palette.mode === "dark" ? "vs-dark" : "vs"}
           options={{
             fontSize: 16,
