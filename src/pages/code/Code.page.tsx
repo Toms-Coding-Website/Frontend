@@ -35,7 +35,7 @@ const CodePage = () => {
         alert("The mentor has disconnected. You will be redirected.");
         setTimeout(() => {
           navigate("/");
-        }, 3000);
+        }, 2000);
       });
 
       newSocket.on("roleAssigned", (role: string) => {
