@@ -2,7 +2,7 @@ import CodeEditor from "../../components/codeEditor/CodeEditor";
 import { Typography, useTheme } from "@mui/material";
 import PageContainer from "../../components/pageContainer/PageContainer";
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import axios from "axios";
 import { ICodeBlock } from "../../utils/types/types";
 import { codeBlockLink, serverLink } from "../../utils/constants/backendLinks";
@@ -23,6 +23,8 @@ const CodePage = () => {
   const [submissionResult, setSubmissionResult] = useState<boolean | null>(
     null
   );
+
+  const debounceTimeout = useRef<number | null>(null);
 
   useEffect(() => {
     const initializeSocket = () => {
@@ -82,7 +84,13 @@ const CodePage = () => {
 
   const handleCodeChange = useCallback(
     (code: string) => {
-      socket?.emit("codeChange", code);
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+
+      debounceTimeout.current = window.setTimeout(() => {
+        socket?.emit("codeChange", code);
+      }, 500);
     },
     [socket]
   );
