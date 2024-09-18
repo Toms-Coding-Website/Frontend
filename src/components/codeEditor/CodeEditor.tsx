@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
 import { Box, Typography, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
@@ -32,55 +32,25 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   submissionResult,
 }) => {
   const theme = useTheme();
+
   const [editorCode, setCode] = useState<string>(code);
-  const editorRef = useRef<any>(null); // Ref to store the editor instance
-  const cursorPositionRef = useRef<any>(null); // Ref to store the cursor position
 
   useEffect(() => {
     setCode(code);
   }, [code]);
 
-  // Throttle or debounce code changes to prevent excessive updates
-  const handleCodeChange = useCallback(
-    (value: string | undefined) => {
-      if (value !== undefined && editorRef.current) {
-        // Store the cursor position before updating the editor content
-        cursorPositionRef.current = editorRef.current.getPosition();
-
-        // Update the editor content if it differs
-        if (editorCode !== value) {
-          setCode(value);
-          onChange(value);
-        }
-      }
-    },
-    [editorCode, onChange]
-  );
-
-  // Handle editor mount to store the editor instance
-  const handleEditorDidMount = (editor: any) => {
-    editorRef.current = editor;
+  const handleEditorChange = (value: string | undefined) => {
+    if (value !== undefined) {
+      setCode(value);
+      onChange(value);
+    }
   };
-
-  // Update editor value and restore cursor position after rendering
-  // useEffect(() => {
-  //   if (editorRef.current && editorCode !== editorRef.current.getValue()) {
-  //     // Use a requestAnimationFrame to ensure updates happen in the next frame
-  //     requestAnimationFrame(() => {
-  //       editorRef.current.setValue(editorCode);
-
-  //       // Restore the cursor position
-  //       if (cursorPositionRef.current) {
-  //         editorRef.current.setPosition(cursorPositionRef.current);
-  //       }
-  //     });
-  //   }
-  // }, [editorCode]);
 
   const handleSubmit = () => {
     if (!codeBlock) return;
 
     const isCorrect = code.trim() === codeBlock.solution.trim();
+
     onSubmitSolution(isCorrect);
   };
 
@@ -138,8 +108,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
           height="100%"
           defaultLanguage="javascript"
           value={editorCode}
-          onChange={handleCodeChange}
-          onMount={handleEditorDidMount} // Set the editor instance when mounted
+          onChange={handleEditorChange}
           theme={theme.palette.mode === "dark" ? "vs-dark" : "vs"}
           options={{
             fontSize: 16,

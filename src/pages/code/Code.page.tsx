@@ -96,7 +96,7 @@ const CodePage = () => {
       const userId = socket.id;
       debounceTimeout.current = window.setTimeout(() => {
         socket?.emit("codeChange", { code, userId });
-      }, 300);
+      }, 5000);
     },
     [socket]
   );
