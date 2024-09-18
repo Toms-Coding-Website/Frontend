@@ -54,7 +54,9 @@ const CodePage = () => {
       });
 
       newSocket.on("codeChange", (code: string) => {
-        setEditorContent(code);
+        if (code !== editorContent) {
+          setEditorContent(code);
+        }
       });
 
       newSocket.on("submissionResult", (isCorrect: boolean) => {
