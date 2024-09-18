@@ -63,19 +63,19 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   };
 
   // Update editor value and restore cursor position after rendering
-  useEffect(() => {
-    if (editorRef.current && editorCode !== editorRef.current.getValue()) {
-      // Use a requestAnimationFrame to ensure updates happen in the next frame
-      requestAnimationFrame(() => {
-        editorRef.current.setValue(editorCode);
+  // useEffect(() => {
+  //   if (editorRef.current && editorCode !== editorRef.current.getValue()) {
+  //     // Use a requestAnimationFrame to ensure updates happen in the next frame
+  //     requestAnimationFrame(() => {
+  //       editorRef.current.setValue(editorCode);
 
-        // Restore the cursor position
-        if (cursorPositionRef.current) {
-          editorRef.current.setPosition(cursorPositionRef.current);
-        }
-      });
-    }
-  }, [editorCode]);
+  //       // Restore the cursor position
+  //       if (cursorPositionRef.current) {
+  //         editorRef.current.setPosition(cursorPositionRef.current);
+  //       }
+  //     });
+  //   }
+  // }, [editorCode]);
 
   const handleSubmit = () => {
     if (!codeBlock) return;
