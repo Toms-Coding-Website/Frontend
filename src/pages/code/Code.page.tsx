@@ -1,26 +1,22 @@
-import CodeEditor from "../../components/codeEditor/CodeEditor";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Typography, useTheme } from "@mui/material";
-import PageContainer from "../../components/pageContainer/PageContainer";
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState, useCallback, useRef, memo } from "react";
+import { io, Socket } from "socket.io-client";
 import axios from "axios";
+
+import CodeEditor from "../../components/codeEditor/CodeEditor";
+import PageContainer from "../../components/pageContainer/PageContainer";
 import { ICodeBlock } from "../../utils/types/types";
 import { codeBlockLink, serverLink } from "../../utils/constants/backendLinks";
-import { io } from "socket.io-client";
 
-const MemoizedCodeEditor = memo(CodeEditor, (prevProps, nextProps) => {
-  return prevProps.code === nextProps.code;
-});
-
-const CodePage = () => {
+const CodePage: React.FC = () => {
   const theme = useTheme();
-  const { codeBlockId } = useParams();
+  const { codeBlockId } = useParams<{ codeBlockId: string }>();
   const navigate = useNavigate();
 
   const [codeBlock, setCodeBlock] = useState<ICodeBlock | null>(null);
   const [mentorId, setMentorId] = useState<string | undefined>(undefined);
   const [studentCount, setStudentCount] = useState<number>(0);
-  const [socket, setSocket] = useState<any>(null);
   const [userType, setUserType] = useState<string | null>(null);
   const [readOnly, setReadOnly] = useState<boolean>(false);
   const [editorContent, setEditorContent] = useState<string>("");
@@ -28,50 +24,42 @@ const CodePage = () => {
     null
   );
 
-  const debounceTimeout = useRef<number | null>(null);
+  const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    const initializeSocket = () => {
-      const newSocket = io(serverLink);
-      setSocket(newSocket);
+    const socket = io(serverLink);
+    socketRef.current = socket;
 
-      newSocket.emit("joinRoom", { roomId: codeBlockId });
+    socket.emit("joinRoom", { roomId: codeBlockId });
 
-      newSocket.on("mentorDisconnected", () => {
-        alert("The mentor has disconnected. You will be redirected.");
-        setTimeout(() => {
-          navigate("/");
-        }, 2000);
-      });
+    socket.on("mentorDisconnected", () => {
+      alert("The mentor has disconnected. You will be redirected.");
+      setTimeout(() => navigate("/"), 2000);
+    });
 
-      newSocket.on("roleAssigned", (role: string) => {
-        setUserType(role);
-        setReadOnly(role === "Mentor");
-        console.log(`[Socket] Assigned role: ${role}`);
-      });
+    socket.on("roleAssigned", (role: string) => {
+      setUserType(role);
+      setReadOnly(role === "Mentor");
+      console.log(`[Socket] Assigned role: ${role}`);
+    });
 
-      newSocket.on("updateRoomStatus", ({ studentCount, mentorId }) => {
-        setMentorId(mentorId);
-        setStudentCount(studentCount);
-      });
+    socket.on("updateRoomStatus", ({ studentCount, mentorId }) => {
+      setMentorId(mentorId);
+      setStudentCount(studentCount);
+    });
 
-      newSocket.on("codeChange", ({ code, userId }) => {
-        if (userId !== newSocket.id && code !== editorContent) {
-          setEditorContent(code);
-        }
-      });
+    socket.on("codeChange", ({ code, userId }) => {
+      if (userId !== socket.id) {
+        setEditorContent(code);
+      }
+    });
 
-      newSocket.on("submissionResult", (isCorrect: boolean) => {
-        setSubmissionResult(isCorrect);
-      });
-
-      return newSocket;
-    };
-
-    const socketInstance = initializeSocket();
+    socket.on("submissionResult", (isCorrect: boolean) => {
+      setSubmissionResult(isCorrect);
+    });
 
     return () => {
-      socketInstance.disconnect();
+      socket.disconnect();
     };
   }, [codeBlockId, navigate]);
 
@@ -88,26 +76,21 @@ const CodePage = () => {
     fetchCodeBlock();
   }, [codeBlockId]);
 
-  const handleCodeChange = useCallback(
-    (code: string) => {
-      if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current);
-      }
-      const userId = socket.id;
-      debounceTimeout.current = window.setTimeout(() => {
-        socket?.emit("codeChange", { code, userId });
-      }, 5000);
-    },
-    [socket]
-  );
+  const handleCodeChange = useCallback((code: string) => {
+    setEditorContent(code);
+    socketRef.current?.emit("codeChange", {
+      code,
+      userId: socketRef.current.id,
+    });
+  }, []);
+
+  const handleSolutionSubmission = useCallback((isCorrect: boolean) => {
+    socketRef.current?.emit("submissionResult", isCorrect);
+  }, []);
 
   if (!codeBlock) {
     return null;
   }
-
-  const handleSolutionSubmission = (isCorrect: boolean) => {
-    socket?.emit("submissionResult", isCorrect);
-  };
 
   return (
     <PageContainer>
@@ -171,7 +154,7 @@ const CodePage = () => {
       >
         Connected Students: {studentCount}
       </Typography>
-      <MemoizedCodeEditor
+      <CodeEditor
         submissionResult={submissionResult}
         onSubmitSolution={handleSolutionSubmission}
         codeBlock={codeBlock}
