@@ -117,6 +117,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
             minimap: { enabled: false },
             scrollBeyondLastLine: false,
             readOnly: readOnly,
+            smoothScrolling: true,
           }}
         />
       </EditorWrapper>
