@@ -53,8 +53,8 @@ const CodePage = () => {
         setStudentCount(studentCount);
       });
 
-      newSocket.on("codeChange", (code: string) => {
-        if (code !== editorContent) {
+      newSocket.on("codeChange", ({ code, userId }) => {
+        if (userId !== newSocket.id && code !== editorContent) {
           setEditorContent(code);
         }
       });
@@ -88,8 +88,9 @@ const CodePage = () => {
 
   const handleCodeChange = useCallback(
     (code: string) => {
+      const userId = socket.id;
       debounceTimeout.current = window.setTimeout(() => {
-        socket?.emit("codeChange", code);
+        socket?.emit("codeChange", { code, userId });
       }, 300);
     },
     [socket]
