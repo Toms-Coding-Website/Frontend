@@ -32,7 +32,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   submissionResult,
 }) => {
   const theme = useTheme();
-
   const [editorCode, setCode] = useState<string>(code);
   const editorRef = useRef<any>(null); // Ref to store the editor instance
   const cursorPositionRef = useRef<any>(null); // Ref to store the cursor position
@@ -41,7 +40,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     setCode(code);
   }, [code]);
 
-  // Throttle or debounce code changes
+  // Throttle or debounce code changes to prevent excessive updates
   const handleCodeChange = useCallback(
     (value: string | undefined) => {
       if (value !== undefined && editorRef.current) {
@@ -66,12 +65,15 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   // Update editor value and restore cursor position after rendering
   useEffect(() => {
     if (editorRef.current && editorCode !== editorRef.current.getValue()) {
-      editorRef.current.setValue(editorCode);
+      // Use a requestAnimationFrame to ensure updates happen in the next frame
+      requestAnimationFrame(() => {
+        editorRef.current.setValue(editorCode);
 
-      // Restore the cursor position
-      if (cursorPositionRef.current) {
-        editorRef.current.setPosition(cursorPositionRef.current);
-      }
+        // Restore the cursor position
+        if (cursorPositionRef.current) {
+          editorRef.current.setPosition(cursorPositionRef.current);
+        }
+      });
     }
   }, [editorCode]);
 
@@ -79,7 +81,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     if (!codeBlock) return;
 
     const isCorrect = code.trim() === codeBlock.solution.trim();
-
     onSubmitSolution(isCorrect);
   };
 
