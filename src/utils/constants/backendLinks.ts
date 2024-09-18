@@ -1,2 +1,2 @@
-export const serverLink: string = "http://localhost:3000";
+export const serverLink: string = "https://backend-ktyz.onrender.com";
 export const codeBlockLink: string = serverLink + "/code-block/";
