@@ -7,6 +7,7 @@ import LobbyPage from "./pages/lobby/Lobby.page";
 import CodePage from "./pages/code/Code.page";
 import Navbar from "./components/navbar/Navbar";
 import { useState } from "react";
+import Footer from "./components/footer/footer";
 
 const router = [
   { path: "/", component: LobbyPage },
@@ -46,7 +47,7 @@ const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <BoxContainer sx={{ backgroundColor: lightTheme.palette.primary.main }}>
+      <BoxContainer>
         <Navbar onThemeChange={toggleTheme} />
         <BoxContent>
           <Router>
@@ -61,6 +62,7 @@ const App = () => {
             </Routes>
           </Router>
         </BoxContent>
+        <Footer />
       </BoxContainer>
     </ThemeProvider>
   );

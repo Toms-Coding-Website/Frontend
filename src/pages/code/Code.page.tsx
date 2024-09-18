@@ -17,12 +17,14 @@ const CodePage = () => {
   const [mentorId, setMentorId] = useState<string | undefined>(undefined);
   const [studentCount, setStudentCount] = useState<number>(0);
   const [socket, setSocket] = useState<any>(null);
-  const [userType, setUserType] = useState<string | null>(null); // Track user type
+  const [userType, setUserType] = useState<string | null>(null);
   const [readOnly, setReadOnly] = useState<boolean>(false);
-  const [editorContent, setEditorContent] = useState<string>(""); // Track editor content
+  const [editorContent, setEditorContent] = useState<string>("");
+  const [submissionResult, setSubmissionResult] = useState<boolean | null>(
+    null
+  );
 
   useEffect(() => {
-    // Function to handle socket events
     const initializeSocket = () => {
       const newSocket = io(serverLink);
       setSocket(newSocket);
@@ -49,6 +51,10 @@ const CodePage = () => {
 
       newSocket.on("codeChange", (code: string) => {
         setEditorContent(code);
+      });
+
+      newSocket.on("submissionResult", (isCorrect: boolean) => {
+        setSubmissionResult(isCorrect);
       });
 
       return newSocket;
@@ -81,21 +87,20 @@ const CodePage = () => {
     [socket]
   );
 
-  const handleCodeSubmit = (code: string) => {
-    // TODO - Complete Submit check with backend API
-    console.log("Submitted code:", code);
-  };
-
   if (!codeBlock) {
     return null;
   }
+
+  const handleSolutionSubmission = (isCorrect: boolean) => {
+    socket?.emit("submissionResult", isCorrect);
+  };
 
   return (
     <PageContainer>
       <Typography
         sx={{
           color: theme.textColors.title,
-          marginBottom: theme.spacing(2),
+          marginBottom: theme.spacing(1),
           textAlign: "center",
           fontWeight: 700,
           fontSize: { xs: "1.3rem", sm: "1.75rem", md: "2rem", lg: "2.3rem" },
@@ -111,12 +116,51 @@ const CodePage = () => {
           fontSize: "1.1rem",
         }}
       >
-        {mentorId ? `Mentor: Tom` : "Mentor: Not assigned"}
-        <br />
+        {codeBlock.description}
+      </Typography>
+      <Typography
+        sx={{
+          color: theme.textColors.title,
+          textAlign: "center",
+          fontSize: { xs: "1.2rem", sm: "1.4rem", md: "1.6rem", lg: "1.8rem" },
+        }}
+      >
+        {"Session Details:"}
+      </Typography>
+      <Typography
+        sx={{
+          color: theme.textColors.text,
+          textAlign: "center",
+          fontSize: "1.1rem",
+        }}
+      >
+        {userType === "Mentor" ? "You are the Mentor" : "You are a Student"}
+      </Typography>
+      {userType !== "Mentor" && (
+        <Typography
+          sx={{
+            color: theme.textColors.text,
+            textAlign: "center",
+            fontSize: "1.1rem",
+          }}
+        >
+          {mentorId ? `Mentor: Tom` : "Mentor: Not assigned"}
+        </Typography>
+      )}
+      <Typography
+        sx={{
+          color: theme.textColors.text,
+          marginBottom: theme.spacing(1),
+          textAlign: "center",
+          fontSize: "1.1rem",
+        }}
+      >
         Connected Students: {studentCount}
       </Typography>
       <CodeEditor
-        onSubmit={handleCodeSubmit}
+        submissionResult={submissionResult}
+        onSubmitSolution={handleSolutionSubmission}
+        codeBlock={codeBlock}
         onChange={handleCodeChange}
         code={editorContent}
         readOnly={readOnly}

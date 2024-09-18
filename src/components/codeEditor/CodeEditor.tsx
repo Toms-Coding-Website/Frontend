@@ -3,8 +3,8 @@ import Editor from "@monaco-editor/react";
 import { Box, Typography, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import DynamicButton from "../button/DynamicButton";
+import { ICodeBlock } from "../../utils/types/types";
 
-// Styled component for the editor wrapper
 const EditorWrapper = styled(Box)(({ theme }) => ({
   width: "100%",
   height: "500px",
@@ -15,26 +15,29 @@ const EditorWrapper = styled(Box)(({ theme }) => ({
 }));
 
 interface CodeEditorProps {
-  onSubmit: (code: string) => void;
   onChange: (code: string) => void;
   code: string;
-  readOnly: boolean; // Add readOnly prop
+  codeBlock: ICodeBlock;
+  readOnly: boolean;
+  onSubmitSolution: (isCorrect: boolean) => void;
+  submissionResult: boolean | null;
 }
 
 const CodeEditor: React.FC<CodeEditorProps> = ({
-  onSubmit,
   onChange,
   code,
+  codeBlock,
   readOnly,
+  onSubmitSolution,
+  submissionResult,
 }) => {
   const theme = useTheme();
 
-  // Sync editor with the incoming code prop
+  const [editorCode, setCode] = useState<string>(code);
+
   useEffect(() => {
     setCode(code);
   }, [code]);
-
-  const [editorCode, setCode] = useState<string>(code);
 
   const handleEditorChange = (value: string | undefined) => {
     if (value !== undefined) {
@@ -44,7 +47,12 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   };
 
   const handleSubmit = () => {
-    onSubmit(editorCode);
+    if (!codeBlock) return;
+
+    const isCorrect = code.trim() === codeBlock.solution.trim();
+
+    // Emit the result to the parent component via the onSubmitSolution prop
+    onSubmitSolution(isCorrect);
   };
 
   return (
@@ -69,6 +77,33 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
       >
         JavaScript Code Editor
       </Typography>
+
+      {submissionResult !== null && (
+        <Box textAlign="center" mb={1}>
+          {submissionResult ? (
+            <Typography
+              sx={{
+                color: "green",
+                fontSize: "1.5rem",
+                fontWeight: "bold",
+              }}
+            >
+              😊 Well done! You have completed the task successfully.
+            </Typography>
+          ) : (
+            <Typography
+              sx={{
+                color: "red",
+                fontSize: "1.5rem",
+                fontWeight: "bold",
+              }}
+            >
+              😟 The submitted code is incorrect. Please try again.
+            </Typography>
+          )}
+        </Box>
+      )}
+
       <EditorWrapper>
         <Editor
           height="100%"
@@ -79,13 +114,13 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
           options={{
             fontSize: 18,
             matchBrackets: "near",
-            minimap: { enabled: false }, // Disable minimap
-            scrollBeyondLastLine: false, // Disable scrolling beyond the last line
-            readOnly: readOnly, // Set readOnly option
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            readOnly: readOnly,
           }}
         />
       </EditorWrapper>
-      {!readOnly && ( // Only show the submit button if not read-only
+      {!readOnly && (
         <DynamicButton
           onClick={handleSubmit}
           label="Submit"

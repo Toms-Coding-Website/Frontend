@@ -67,9 +67,9 @@ const LobbyPage = () => {
         <FlexedBox>
           <Grid
             container
-            rowSpacing={6}
+            rowSpacing={4}
             columnSpacing={1}
-            sx={{ maxWidth: "85rem", mb: 3 }}
+            sx={{ maxWidth: "85rem" }}
           >
             {codeBlocks.map((codeBlock) => (
               <TransitionGridItem

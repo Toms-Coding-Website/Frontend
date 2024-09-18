@@ -43,7 +43,7 @@ const lightTheme = createTheme({
     mode: "light",
   },
   textColors: {
-    link: "#1e88e5",
+    link: "#1a4fa1",
     text: "#102C57",
     title: "#102C57",
   },
@@ -51,7 +51,7 @@ const lightTheme = createTheme({
     codeBlock: "#f5f5f5",
     navbar: "#DAC0A3",
     main: "#EADBC8",
-    footer: "#e0e0e0",
+    footer: "#DAC0A3",
     button: "#c4a684",
   },
   hoverColors: {
@@ -64,7 +64,7 @@ const darkTheme = createTheme({
     mode: "dark",
   },
   textColors: {
-    link: "#bb86fc",
+    link: "#d4bc9b",
     text: "#ECDFCC",
     title: "#ECDFCC",
   },
