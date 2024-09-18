@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Editor from "@monaco-editor/react";
 import { Box, Typography, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import DynamicButton from "../button/DynamicButton";
 import { ICodeBlock } from "../../utils/types/types";
 
-// Style for the editor wrapper
 const EditorWrapper = styled(Box)(({ theme }) => ({
   width: "100%",
   height: "500px",
@@ -42,16 +41,22 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     setCode(code);
   }, [code]);
 
-  // Handle editor changes
-  const handleEditorChange = (value: string | undefined) => {
-    if (value !== undefined && editorRef.current) {
-      // Store the cursor position before updating the editor content
-      cursorPositionRef.current = editorRef.current.getPosition();
+  // Throttle or debounce code changes
+  const handleCodeChange = useCallback(
+    (value: string | undefined) => {
+      if (value !== undefined && editorRef.current) {
+        // Store the cursor position before updating the editor content
+        cursorPositionRef.current = editorRef.current.getPosition();
 
-      setCode(value);
-      onChange(value);
-    }
-  };
+        // Update the editor content if it differs
+        if (editorCode !== value) {
+          setCode(value);
+          onChange(value);
+        }
+      }
+    },
+    [editorCode, onChange]
+  );
 
   // Handle editor mount to store the editor instance
   const handleEditorDidMount = (editor: any) => {
@@ -60,7 +65,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 
   // Update editor value and restore cursor position after rendering
   useEffect(() => {
-    if (editorRef.current) {
+    if (editorRef.current && editorCode !== editorRef.current.getValue()) {
       editorRef.current.setValue(editorCode);
 
       // Restore the cursor position
@@ -132,7 +137,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
           height="100%"
           defaultLanguage="javascript"
           value={editorCode}
-          onChange={handleEditorChange}
+          onChange={handleCodeChange}
           onMount={handleEditorDidMount} // Set the editor instance when mounted
           theme={theme.palette.mode === "dark" ? "vs-dark" : "vs"}
           options={{
