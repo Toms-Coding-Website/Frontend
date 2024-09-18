@@ -112,12 +112,14 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
           onChange={handleEditorChange}
           theme={theme.palette.mode === "dark" ? "vs-dark" : "vs"}
           options={{
-            fontSize: 18,
+            fontSize: 16,
             matchBrackets: "near",
             minimap: { enabled: false },
             scrollBeyondLastLine: false,
             readOnly: readOnly,
             smoothScrolling: true,
+            automaticLayout: true,
+            cursorSmoothCaretAnimation: "off",
           }}
         />
       </EditorWrapper>
