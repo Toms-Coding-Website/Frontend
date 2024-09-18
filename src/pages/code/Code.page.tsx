@@ -2,11 +2,13 @@ import CodeEditor from "../../components/codeEditor/CodeEditor";
 import { Typography, useTheme } from "@mui/material";
 import PageContainer from "../../components/pageContainer/PageContainer";
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, memo } from "react";
 import axios from "axios";
 import { ICodeBlock } from "../../utils/types/types";
 import { codeBlockLink, serverLink } from "../../utils/constants/backendLinks";
 import { io } from "socket.io-client";
+
+const MemoizedCodeEditor = memo(CodeEditor);
 
 const CodePage = () => {
   const theme = useTheme();
@@ -52,7 +54,9 @@ const CodePage = () => {
       });
 
       newSocket.on("codeChange", (code: string) => {
-        setEditorContent(code);
+        if (code !== editorContent) {
+          setEditorContent(code);
+        }
       });
 
       newSocket.on("submissionResult", (isCorrect: boolean) => {
@@ -84,13 +88,9 @@ const CodePage = () => {
 
   const handleCodeChange = useCallback(
     (code: string) => {
-      if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current);
-      }
-
       debounceTimeout.current = window.setTimeout(() => {
         socket?.emit("codeChange", code);
-      }, 500);
+      }, 300);
     },
     [socket]
   );
@@ -165,7 +165,7 @@ const CodePage = () => {
       >
         Connected Students: {studentCount}
       </Typography>
-      <CodeEditor
+      <MemoizedCodeEditor
         submissionResult={submissionResult}
         onSubmitSolution={handleSolutionSubmission}
         codeBlock={codeBlock}
