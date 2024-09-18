@@ -1,155 +1,15 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { Typography, useTheme, Box } from "@mui/material";
+import { Typography, useTheme } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import axios from "axios";
-import debounce from "lodash/debounce";
-import Editor, { OnMount } from "@monaco-editor/react";
-import { styled } from "@mui/material/styles";
 
+import CodeEditor from "../../components/codeEditor/CodeEditor";
 import PageContainer from "../../components/pageContainer/PageContainer";
-import DynamicButton from "../../components/button/DynamicButton";
 import { ICodeBlock } from "../../utils/types/types";
 import { codeBlockLink, serverLink } from "../../utils/constants/backendLinks";
 
-const EditorWrapper = styled(Box)(({ theme }) => ({
-  width: "100%",
-  height: "500px",
-  border: `0.2rem solid ${theme.palette.divider}`,
-  borderRadius: "2rem",
-  overflow: "hidden",
-  marginBottom: theme.spacing(1),
-}));
-
-interface CodeEditorProps {
-  onChange: (code: string) => void;
-  code: string;
-  codeBlock: ICodeBlock;
-  readOnly: boolean;
-  onSubmitSolution: (isCorrect: boolean) => void;
-  submissionResult: boolean | null;
-  onMount?: (editor: any) => void;
-}
-
-const CodeEditor: React.FC<CodeEditorProps> = React.memo(
-  ({
-    onChange,
-    code,
-    codeBlock,
-    readOnly,
-    onSubmitSolution,
-    submissionResult,
-    onMount,
-  }) => {
-    const theme = useTheme();
-    const editorRef = useRef<any>(null);
-
-    const handleEditorDidMount: OnMount = (editor) => {
-      editorRef.current = editor;
-      if (onMount) {
-        onMount(editor);
-      }
-    };
-
-    const handleEditorChange = (value: string | undefined) => {
-      if (value !== undefined) {
-        onChange(value);
-      }
-    };
-
-    const handleSubmit = () => {
-      if (!codeBlock) return;
-      const isCorrect =
-        editorRef.current.getValue().trim() === codeBlock.solution.trim();
-      onSubmitSolution(isCorrect);
-    };
-
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          width: "100%",
-          maxWidth: "800px",
-          margin: "0 auto",
-          padding: 2,
-        }}
-      >
-        <Typography
-          sx={{
-            color: theme.textColors.title,
-            marginBottom: theme.spacing(1),
-            textAlign: "center",
-            fontSize: {
-              xs: "1.2rem",
-              sm: "1.4rem",
-              md: "1.6rem",
-              lg: "1.8rem",
-            },
-          }}
-        >
-          JavaScript Code Editor
-        </Typography>
-
-        {submissionResult !== null && (
-          <Box textAlign="center" mb={1}>
-            {submissionResult ? (
-              <Typography
-                sx={{
-                  color: "green",
-                  fontSize: "1.5rem",
-                  fontWeight: "bold",
-                }}
-              >
-                😊 Well done! You have completed the task successfully.
-              </Typography>
-            ) : (
-              <Typography
-                sx={{
-                  color: "red",
-                  fontSize: "1.5rem",
-                  fontWeight: "bold",
-                }}
-              >
-                😟 The submitted code is incorrect. Please try again.
-              </Typography>
-            )}
-          </Box>
-        )}
-
-        <EditorWrapper>
-          <Editor
-            height="100%"
-            defaultLanguage="javascript"
-            value={code}
-            onChange={handleEditorChange}
-            onMount={handleEditorDidMount}
-            theme={theme.palette.mode === "dark" ? "vs-dark" : "vs"}
-            options={{
-              fontSize: 16,
-              matchBrackets: "near",
-              minimap: { enabled: false },
-              scrollBeyondLastLine: false,
-              readOnly: readOnly,
-              smoothScrolling: true,
-              automaticLayout: true,
-              cursorSmoothCaretAnimation: "off",
-            }}
-          />
-        </EditorWrapper>
-        {!readOnly && (
-          <DynamicButton
-            onClick={handleSubmit}
-            label="Submit"
-            variant="contained"
-            size="small"
-          />
-        )}
-      </Box>
-    );
-  }
-);
+const UPDATE_INTERVAL = 5000;
 
 const CodePage: React.FC = () => {
   const theme = useTheme();
@@ -168,7 +28,7 @@ const CodePage: React.FC = () => {
 
   const socketRef = useRef<Socket | null>(null);
   const editorRef = useRef<any>(null);
-  const isLocalChange = useRef<boolean>(false);
+  const lastSentCode = useRef<string>("");
 
   useEffect(() => {
     const socket = io(serverLink);
@@ -194,7 +54,6 @@ const CodePage: React.FC = () => {
 
     socket.on("codeChange", ({ code, userId }) => {
       if (userId !== socket.id) {
-        isLocalChange.current = false;
         setEditorContent(code);
       }
     });
@@ -221,38 +80,27 @@ const CodePage: React.FC = () => {
     fetchCodeBlock();
   }, [codeBlockId]);
 
-  const debouncedEmitChange = useCallback(
-    debounce((code: string) => {
-      socketRef.current?.emit("codeChange", {
-        code,
-        userId: socketRef.current.id,
-      });
-    }, 300),
-    []
-  );
-
-  const handleCodeChange = useCallback(
-    (code: string) => {
-      isLocalChange.current = true;
-      setEditorContent(code);
-      debouncedEmitChange(code);
-    },
-    [debouncedEmitChange]
-  );
-
-  const handleEditorDidMount = (editor: any) => {
-    editorRef.current = editor;
-  };
-
   useEffect(() => {
-    if (editorRef.current && !isLocalChange.current) {
-      const editor = editorRef.current;
-      const position = editor.getPosition();
-      editor.setValue(editorContent);
-      editor.setPosition(position);
-    }
-    isLocalChange.current = false;
-  }, [editorContent]);
+    const intervalId = setInterval(() => {
+      if (
+        editorRef.current &&
+        lastSentCode.current !== editorRef.current.getValue()
+      ) {
+        const currentCode = editorRef.current.getValue();
+        socketRef.current?.emit("codeUpdate", {
+          code: currentCode,
+          userId: socketRef.current.id,
+        });
+        lastSentCode.current = currentCode;
+      }
+    }, UPDATE_INTERVAL);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const handleCodeChange = useCallback((code: string) => {
+    setEditorContent(code);
+  }, []);
 
   const handleSolutionSubmission = useCallback((isCorrect: boolean) => {
     socketRef.current?.emit("submissionResult", isCorrect);
@@ -331,7 +179,6 @@ const CodePage: React.FC = () => {
         onChange={handleCodeChange}
         code={editorContent}
         readOnly={readOnly}
-        onMount={handleEditorDidMount}
       />
     </PageContainer>
   );
