@@ -23,7 +23,6 @@ const socket = io(serverLink);
 const LobbyPage = () => {
   const theme = useTheme();
   const [codeBlocks, setCodeBlocks] = useState<ICodeBlock[]>([]);
-  const [role, setRole] = useState<"Mentor" | "Student" | null>(null);
 
   useEffect(() => {
     const fetchCodeBlocks = async () => {
@@ -33,7 +32,6 @@ const LobbyPage = () => {
     fetchCodeBlocks();
 
     socket.on("roomJoined", ({ roomId, userRole }) => {
-      setRole(userRole);
       console.log(`[Socket] Joined room ${roomId} as ${userRole}`);
     });
 
