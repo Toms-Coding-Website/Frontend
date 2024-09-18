@@ -17,6 +17,7 @@ const CodeBlockCard = ({
   const theme = useTheme();
   const navigate = useNavigate();
 
+  // Helper function to truncate text if it exceeds a certain length
   const truncateText = (text: string, maxLength: number) => {
     if (text?.length > maxLength) {
       return text.slice(0, maxLength) + "...";

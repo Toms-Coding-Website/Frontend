@@ -14,6 +14,7 @@ const FlexedBox = styled(Box)(({ theme }) => ({
   marginTop: theme.spacing(3),
 }));
 
+// Animated transition for grid items
 const TransitionGridItem = styled(Grid)(() => ({
   transition: "all 0.4s ease-in-out",
 }));
@@ -31,6 +32,7 @@ const LobbyPage = () => {
     };
     fetchCodeBlocks();
 
+    // Listen to socket events
     socket.on("roomJoined", ({ roomId, userRole }) => {
       console.log(`[Socket] Joined room ${roomId} as ${userRole}`);
     });
